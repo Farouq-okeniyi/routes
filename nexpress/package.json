@@ -1,0 +1,15 @@
+{
+  "name": "nexpress",
+  "version": "1.0.0",
+  "description": "learning express js with node",
+  "main": "app.js",
+  "scripts": {
+    "test": "nodemon server.js"
+  },
+  "author": "farouq okeniyi",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "morgan": "^1.10.0"
+  }
+}
