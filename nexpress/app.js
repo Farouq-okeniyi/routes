@@ -9,7 +9,10 @@ const MovieRoute = require('./routes/movieroutes')
 
 
 app.use(express.json())
-app.use(morgan('dev'))
+
+if(process.env.NODE_ENV ==='development'){
+    app.use(morgan('dev'))
+}
 app.use(express.static('./public'))
 app.use('/api/v1/movies', MovieRoute)
       
