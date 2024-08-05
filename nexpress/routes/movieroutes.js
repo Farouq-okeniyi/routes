@@ -4,23 +4,23 @@ const moviecontroller = require('./../controller/movieshandler')
 
 const Router = express.Router();
 
-Router.param('id', moviecontroller.chekcid)
+// Router.param('id', moviecontroller.chekcid)
 
 Router.route('/')
 
             .get(moviecontroller.GetAllMovies)
 
-            .post(moviecontroller.ValidateFunction, moviecontroller.CreateMovies);
+            .post( moviecontroller.CreateMovies);
 
 
 Router.route('/:id')
 
 
-            .get( moviecontroller.chekcid,moviecontroller.GetMovies)
+            .get(moviecontroller.GetMovies)
 
-            .patch(moviecontroller.ValidateFunction,moviecontroller.PatchMovies)
+            .patch(moviecontroller.PatchMovies)
 
-            .delete(moviecontroller.chekcid,moviecontroller.DeleteMovies);
+            .delete(moviecontroller.DeleteMovies);
 
 
 
