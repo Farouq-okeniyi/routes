@@ -10,7 +10,7 @@ const moviesscema = new mongoose.Schema({
 
         unique:true
     },
-    Discription: {
+    Description: {
         type:String,
 
         required: [true, 'Description is required']
@@ -28,17 +28,17 @@ const moviesscema = new mongoose.Schema({
     default: 1
 
     },
-    Totalrating:{
+    TotalRating:{
         type:Number
 
     },
-    Releaseyear:{
+    ReleaseYear:{
         type: Number,
 
         required:[true,'Release year is required']
 
     },
-    Releasedate:{
+    ReleaseDate:{
         type: Date,
 
         required:[true,'Release year is required']
@@ -62,7 +62,7 @@ const moviesscema = new mongoose.Schema({
         required:[true,'Direcctors are required']
 
     },
-    Coverimage:{
+    CoverImage:{
         type: String,
 
         required:[true,'COver image is needed']

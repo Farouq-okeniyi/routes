@@ -4,7 +4,25 @@ const Moviee = require('./../model/moviemodel');
 
 async function GetAllMovies(req, res) {
     try{
+        console.log(req.query)
+
+        const excludefields = ['sort', 'page', 'limit', 'fields']
+
+        const queryObj = {...req.query}
+
+
+        excludefields.forEach((el)=>{
+            delete queryObj[el]
+        })
+
+        console.log(queryObj);
+        console.log(req.query);
         const movies = await Moviee.find()
+                            .where('Duration')
+                            .equals(req.query.duration)
+                            .where('Rating')
+                            .equals(req.query.rating);
+
 
         res.status(201).json({
             status:"Succesful",
