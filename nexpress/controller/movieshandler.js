@@ -2,9 +2,14 @@
 // const movies = JSON.parse(fs.readFileSync('./data/movies.json'))
 const { query } = require('express');
 const Moviee = require('./../model/moviemodel');
+const apiFeatures = require('./../utility/apifeatures')
 
 async function GetAllMovies(req, res) {
     try{
+        
+        const features = new apiFeatures(Moviee.find(), req.query).sort();
+
+        const movies = await features;
         // method to filter
 
         // console.log(req.query)
@@ -31,47 +36,41 @@ async function GetAllMovies(req, res) {
         // const movies = await Moviee.find(queryObj);
 
         // find values greater than or lesserr than
-        let queryStr = JSON.stringify(req.query);
-
-        queryStr = queryStr.replace(/\b(gte| gt|lte|lt)/g, (match)=> `$${match}`)
-
-        const queryObj = JSON.parse(queryStr);
-
-        // let movies = await Moviee.find(queryObj);
-        let querycheck =  Moviee.find(queryObj);
-
+        // let queryStr = JSON.stringify(req.query);
+        // queryStr = queryStr.replace(/\b(gte| gt|lte|lt)/g, (match)=> `$${match}`)
+        // const queryObj = JSON.parse(queryStr);
+        // // let movies = await Moviee.find(queryObj);
+        // let query =  Moviee.find(queryObj);
         // const movies = await Moviee.find(req.query);
+
         //sort movies
-        if(req.query.sort){
-            const sortBy = req.query.sort.split(',').join(" ")
-
-            console.log(sortBy)
-
-            querycheck = querycheck.sort(sortBy);
-        }
-        else{
-             querycheck = querycheck.sort('ReleaseYear')
-        }
+        // if(req.query.sort){
+        //     const sortBy = req.query.sort.split(',').join( '');
+        //     console.log(sortBy)
+        //     query = query.sort(sortBy);
+        // }
+        // else{
+        //      query = query.sort('ReleaseYear')
+        // }
 
         //pagination
-        const page = req.query.page*1 || 1;
-        
-        const limit = req.query.limit*1 || 10;
+        // const page = req.query.page*1 || 1;
+        // const limit = req.query.limit*1 || 10;
 
-        console.log(page,limit)
-            const skip = (page-1)*limit
+        //     const skip = (page-1)*limit
             
-              querycheck = querycheck.skip(skip).limit(limit);
+        //     query = query.skip(skip).limit(limit)
 
-        if(req.query.page){
-            const moviecount = await Moviee.countDocuments()
+        // if(req.query.page){
+        //     const moviecount = await Moviee.countDocuments()
 
-            if(skip >= moviecount){
-                throw new error('This page not found')
-            }
-        }
-        const movies = await querycheck;
-        // console.log(movies)
+        //     if(skip >= moviecount){
+        //         throw new error('This page not found')
+        //     }
+        // }
+
+        // const movies = await query;
+
         res.status(201).json({
             status:"Succesful",
             
