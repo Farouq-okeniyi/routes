@@ -84,7 +84,7 @@ const moviesscema = new mongoose.Schema({
 })
 
 //creating a model
-const Moviee = mongoose.model(('moviee'), moviesscema);
+const Moviee = mongoose.model(('moviees'), moviesscema);
 
 module.exports = Moviee;
 

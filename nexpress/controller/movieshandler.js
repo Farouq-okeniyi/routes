@@ -1,35 +1,83 @@
 // const fs = require('fs')
 // const movies = JSON.parse(fs.readFileSync('./data/movies.json'))
+const { query } = require('express');
 const Moviee = require('./../model/moviemodel');
 
 async function GetAllMovies(req, res) {
     try{
-        console.log(req.query)
+        // method to filter
 
-        const excludefields = ['sort', 'page', 'limit', 'fields']
+        // console.log(req.query)
 
-        const queryObj = {...req.query}
+        // const excludefields = ['sort', 'page', 'limit', 'fields']
 
+        // const queryObj = {...req.query}
+        
+        
+        // excludefields.forEach((el)=>{
+        //         delete queryObj[el]
+        //     })
+            
+    // other apporach
+            //     console.log(queryObj);
+            //     const movies = await Moviee.find()
+            //         .where('Duration')
+            //         .gte(req.query.duration)
+            //         .where('Rating')
+            //         .gte(req.query.rating);
+            
+            // console.log(req.query);
 
-        excludefields.forEach((el)=>{
-            delete queryObj[el]
-        })
+        // const movies = await Moviee.find(queryObj);
 
-        console.log(queryObj);
-        console.log(req.query);
-        const movies = await Moviee.find()
-                            .where('Duration')
-                            .equals(req.query.duration)
-                            .where('Rating')
-                            .equals(req.query.rating);
+        // find values greater than or lesserr than
+        let queryStr = JSON.stringify(req.query);
 
+        queryStr = queryStr.replace(/\b(gte| gt|lte|lt)/g, (match)=> `$${match}`)
 
+        const queryObj = JSON.parse(queryStr);
+
+        // let movies = await Moviee.find(queryObj);
+        let querycheck =  Moviee.find(queryObj);
+
+        // const movies = await Moviee.find(req.query);
+        //sort movies
+        if(req.query.sort){
+            const sortBy = req.query.sort.split(',').join(" ")
+
+            console.log(sortBy)
+
+            querycheck = querycheck.sort(sortBy);
+        }
+        else{
+             querycheck = querycheck.sort('ReleaseYear')
+        }
+
+        //pagination
+        const page = req.query.page*1 || 1;
+        
+        const limit = req.query.limit*1 || 10;
+
+        console.log(page,limit)
+            const skip = (page-1)*limit
+            
+              querycheck = querycheck.skip(skip).limit(limit);
+
+        if(req.query.page){
+            const moviecount = await Moviee.countDocuments()
+
+            if(skip >= moviecount){
+                throw new error('This page not found')
+            }
+        }
+        const movies = await querycheck;
+        // console.log(movies)
         res.status(201).json({
             status:"Succesful",
             
-            length: Moviee.length,
+            length: movies.length,
             
-            movies: movies
+            movies: movies,
         })
     }catch(err){
         res.status(400).json({
