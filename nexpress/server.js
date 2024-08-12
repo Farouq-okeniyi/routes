@@ -8,11 +8,11 @@ const app = require('./app')
     // console.log(app.get('env '))
     // console.log(process.env)
 
-mongoose.connect(process.env.mongodbstr//localhost:27017/cinetflix
+mongoose.connect(process.env.local_con_string//localhost:27017/cinetflix
     ,{ 
-    tls: true, // Enable TLS
-    tlsAllowInvalidCertificates: true,
-    ssl: true,
+    // tls: true // Enable TLS
+    // tlsAllowInvalidCertificates: true,
+    // ssl: true,
 
 }).then((conn)=>{
     // console.log(conn);

@@ -1,6 +1,6 @@
 const express = require('express')
 
-const moviecontroller = require('./../controller/movieshandler')
+const moviecontroller = require('./../controller/movieshandler');
 
 const Router = express.Router();
 
@@ -12,6 +12,9 @@ Router.route('/')
 
             .post( moviecontroller.CreateMovies);
 
+Router.route('/movie-stats').get(moviecontroller.getmoviestats);
+
+Router.route('/movie-by-genre/:genre').get(moviecontroller.getmoviebygenre);
 
 Router.route('/:id')
 

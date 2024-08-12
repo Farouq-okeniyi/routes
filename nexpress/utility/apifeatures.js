@@ -2,41 +2,39 @@ class apiFeatures{
     constructor(query, queryStr){
         this.query = query;
         this.queryStr = queryStr;
-    }
+    }   
 
     //filter constructor
 
-    filter(){
-        let queryString = JSON.stringify(this.queryStr);
-
-        queryString = queryString.replace(/\b(gte| gt|lte|lt)/g, (match)=> `$${match}`)
-
+    filter() {
+        // Work with plain query string, avoid MongoDB object stringification
+        let queryStrCopy = { ...this.queryStr };
+        
+        // Replace operators with MongoDB-specific ones
+        let queryString = JSON.stringify(queryStrCopy);
+        queryString = queryString.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+        
         const queryObj = JSON.parse(queryString);
-      
-        this.query =  this.query.find(queryObj);
 
-        return this;
+        // Apply the filter to the MongoDB query
+        this.query = this.query.find(queryObj);
+
+        return this;  // Allow method chaining
     }
 
     //sort constructor
     sort(){
-     
-        
             if (this.queryStr.sort) {
-                // Split the sort parameters by commas and join them with spaces
                 const sortBy = this.queryStr.sort.split(',').join(' ');
-        
-                console.log('Sorting by:', sortBy);
-        
-                // Apply the sort to the query
+                // console.log('hello')
                 this.query = this.query.sort(sortBy);
+
             } else {
-                // Default sort by 'ReleaseYear'
                 this.query = this.query.sort('ReleaseYear');
+
             }
-        
+            // console.log('hello')
             return this;  // Return 'this' to allow method chaining
-        
     }
 
     //paginate method
@@ -48,17 +46,10 @@ class apiFeatures{
             
             this.query = this.query.skip(skip).limit(limit)
 
-        // if(this.queryStr.page){
-        //     const moviecount = await this.query.countDocuments()
-
-        //     if(skip >= moviecount){
-        //         throw new error('This page not found')
-        //     }
-        // }
-
-        return this
-
-    }
+            // console.log('paginate')      
+            return this;
+            
+        }
 }
 
 module.exports = apiFeatures
@@ -69,4 +60,14 @@ module.exports = apiFeatures
 // let queryparsestring = JSON.parse(this.queryStr);
 // // // let movies = await Moviee.find(queryObj);
 // // let query =  Moviee.find(queryObj);
+
+
+
+// if(this.queryStr.page){
+//     const moviecount = await this.query.countDocuments()
+
+//     if(skip >= moviecount){
+//         throw new error('This page not found')
+//     }
+// }
 // // const movies = await 

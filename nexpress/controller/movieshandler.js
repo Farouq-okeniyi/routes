@@ -2,74 +2,19 @@
 // const movies = JSON.parse(fs.readFileSync('./data/movies.json'))
 const { query } = require('express');
 const Moviee = require('./../model/moviemodel');
-const apiFeatures = require('./../utility/apifeatures')
-
-async function GetAllMovies(req, res) {
-    try{
+const apiFeatures = require('./../utility/apifeatures');
+const CustomError = require('../utility/customError');
+const asyncErrorHandler = require('./../utility/asyncErrorHandling')
+const mongoose = require('mongoose')
+async function GetAllMovies(req, res,next) {
+   
         
-        const features = new apiFeatures(Moviee.find(), req.query).sort();
+        const features = new apiFeatures(Moviee.find(), req.query)
+                                .filter()
+                                .sort()
+                                .paginate();
 
-        const movies = await features;
-        // method to filter
-
-        // console.log(req.query)
-
-        // const excludefields = ['sort', 'page', 'limit', 'fields']
-
-        // const queryObj = {...req.query}
-        
-        
-        // excludefields.forEach((el)=>{
-        //         delete queryObj[el]
-        //     })
-            
-    // other apporach
-            //     console.log(queryObj);
-            //     const movies = await Moviee.find()
-            //         .where('Duration')
-            //         .gte(req.query.duration)
-            //         .where('Rating')
-            //         .gte(req.query.rating);
-            
-            // console.log(req.query);
-
-        // const movies = await Moviee.find(queryObj);
-
-        // find values greater than or lesserr than
-        // let queryStr = JSON.stringify(req.query);
-        // queryStr = queryStr.replace(/\b(gte| gt|lte|lt)/g, (match)=> `$${match}`)
-        // const queryObj = JSON.parse(queryStr);
-        // // let movies = await Moviee.find(queryObj);
-        // let query =  Moviee.find(queryObj);
-        // const movies = await Moviee.find(req.query);
-
-        //sort movies
-        // if(req.query.sort){
-        //     const sortBy = req.query.sort.split(',').join( '');
-        //     console.log(sortBy)
-        //     query = query.sort(sortBy);
-        // }
-        // else{
-        //      query = query.sort('ReleaseYear')
-        // }
-
-        //pagination
-        // const page = req.query.page*1 || 1;
-        // const limit = req.query.limit*1 || 10;
-
-        //     const skip = (page-1)*limit
-            
-        //     query = query.skip(skip).limit(limit)
-
-        // if(req.query.page){
-        //     const moviecount = await Moviee.countDocuments()
-
-        //     if(skip >= moviecount){
-        //         throw new error('This page not found')
-        //     }
-        // }
-
-        // const movies = await query;
+        const movies = await features.query; 
 
         res.status(201).json({
             status:"Succesful",
@@ -78,19 +23,11 @@ async function GetAllMovies(req, res) {
             
             movies: movies,
         })
-    }catch(err){
-        res.status(400).json({
-            Status:"Unsuccesful",
-            
-            Message: err.message
-            
-        })
     }
     
-}
 
-async function CreateMovies(req, res) {
-    try{
+
+const CreateMovies = async(req,res,next)=>{
         const movie = await Moviee.create(req.body)
         res.status(201).json({
             Status: 'Succesful',
@@ -98,20 +35,20 @@ async function CreateMovies(req, res) {
             data: {movie}
             
         })
-    }catch(err){
-        res.status(400).json({
-            
-            Status: 'Unsuccesful',
-            
-            Message: err.message
-        })
     }
-}
 
-async function DeleteMovies(req, res) {
-    try {
-        await Moviee.findByIdAndDelete(req.params.id)
-        
+// async function CreateMovies(req, res, next) {
+  
+// }
+
+async function DeleteMovies(req, res,next) {
+        const deleteMovie = await Moviee.findByIdAndDelete(req.params.id)
+
+        if(!deleteMovie){
+            const error = new CustomError('movie with that id not found')
+            return next(error)
+        }
+
         res.status(201).json({
             
             status:"Succesful",
@@ -119,71 +56,113 @@ async function DeleteMovies(req, res) {
             Data: null
         })
         
-    } catch (error) {
-        res.status(400).json({
-
-            Status: 'Unsuccesful',
-            
-            Message: err.message
-        })
-        
-    }
-    
 }
 
-async function GetMovies(req, res) {
-    try{
-        const movie = await Moviee.findById(req.params.id);
-        res.status(201).json({
+async function GetMovies(req, res,next) {
+        const movie = await Moviee.findById(new mongoose.Types.ObjectId(req.params.id));
+       
+        if(!movie){
+            const error = new CustomError('movie with that id not found')
+            return next(error)
+        }
+        res.status(200).json({
             status:"Succesful",
-            
             movies: movie
         })
         
-    }catch(err){
-        
-        res.status(400).json({
-            
-            Status: 'Unsuccesful',
-            
-            Message: err.message
-        })
-    }
-    
+   
 }
-async function PatchMovies(req, res) {
+async function PatchMovies(req, res,next) {
+
     try {
-        const UpdatedMovie = await Moviee.findByIdAndUpdate(req.params.id, req.body, {new :true,runValidator:true });
         
+        const UpdatedMovie = await Moviee.findByIdAndUpdate(req.params.id, req.body, {new :true,runValidator:true });
+        if(!UpdatedMovie){
+            const error = new CustomError('movie with that id not found')
+            return next(error)
+        }
         res.status(201).json({
             Status:"Succesful",
         
             Data: UpdatedMovie
         })
-    } catch (err) {
-        res.status(400).json({
-            
-            Status: 'Unsuccesful',
-            
-            Message: err.message
-        })
+    } catch (error) {
+        res.status(404).json({
+            Status:"UNSuccesful",
         
+           Message: error.Message
+        })
     }
+
+ 
     
     
 }
 
+async function getmoviestats(req,res,next){
+    
+        const stats = await Moviee.aggregate([
+            {$match: {Rating :{$gte:4.5}}},
+
+            {$group : {
+                _id: '$ReleaseYear',
+                ave_rating :{$avg : '$Rating'},
+                ave_price :{$avg: '$Price'},
+                min_price : {$min: '$Price'},
+                max_price :{$max: '$Price'}
+            }},
+            {
+                $sort:{min_price:-1}
+            }
+
+        ])
+        res.status(200).json({
+            
+            Status: 'succesful',
+            
+            Message: {stats}
+        })
+  
+}
+
+async function getmoviebygenre(req,res,next) {
+   
+        const genre = req.params.genre;
+        console.log(genre)
+        const Movie = await Moviee.aggregate([
+            {$unwind: '$Genres'},
+            {$group: {
+                _id: '$Genres',
+                moviecount: {$sum: 1},
+                movies:{$push: '$Name'}
+            }},
+            {$addFields: {genre : '$_id'}},
+            {$project:{_id:0}},
+            {$sort:{moviecount: -1}},
+            {$match: {genre: genre}}
+        ]);
+        res.status(200).json({
+            
+            Status: 'succesful',
+            
+            movies: {Movie}
+        })
+    }
 
 module.exports = {
-    GetAllMovies,
+    GetAllMovies:asyncErrorHandler(GetAllMovies),
     
-    GetMovies,
+    GetMovies:asyncErrorHandler(GetMovies),
     
-    PatchMovies,
+    PatchMovies:asyncErrorHandler(PatchMovies),
     
-    DeleteMovies,
-    
-    CreateMovies,
+    DeleteMovies:asyncErrorHandler(DeleteMovies),
+
+    getmoviestats:asyncErrorHandler(getmoviestats),
+
+    getmoviebygenre: asyncErrorHandler(getmoviebygenre),
+
+    CreateMovies: asyncErrorHandler(CreateMovies)
     
     // chekcid,
     
