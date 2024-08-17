@@ -59,7 +59,8 @@ async function DeleteMovies(req, res,next) {
 }
 
 async function GetMovies(req, res,next) {
-        const movie = await Moviee.findById(new mongoose.Types.ObjectId(req.params.id));
+        const movie = await Moviee.findById(req.params.id);
+        // const movie = await Moviee.findById(new mongoose.Types.ObjectId(req.params.id));
        
         if(!movie){
             const error = new CustomError('movie with that id not found')

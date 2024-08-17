@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const fs = require('fs')
 const validator = require('validator')
+const { kMaxLength } = require('buffer')
 //schema
 
 const moviesscema = new mongoose.Schema({
@@ -10,7 +11,9 @@ const moviesscema = new mongoose.Schema({
         required: [true, 'Name is required'],
 
         unique:true,
-        validate: [validator.isAlpha, 'Name should be only letters']
+        validate: [validator.isAlpha, 'Name should be only letters'],
+        maxLength: [30, 'Movie name must be less than 30 characters'],
+        minLength: [5, 'Movie name must be more than 3 characters'],
     },
     Description: {
         type:String,
@@ -112,7 +115,7 @@ moviesscema.post('save', function(doc,next){
 moviesscema.pre(['find', 'findOne'],function(next){
     // this.find({ReleaseDate:{$lte: Date.now()}})
     this.StartTime = Date.now();
-    console.log('hello')
+    // console.log('hello')
     next()
 })
 
